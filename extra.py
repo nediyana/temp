@@ -140,10 +140,15 @@ def main():
 		# print "max overall"
 		# print max(overall)
 
-		ax.scatter(x_eyes, y_eyes, color ='red')
-		ax.scatter(x_hits, y_hits, color = 'blue')
+		circlesX = [756.0, 696.1073774384583, 544.4539334827342, 372.00000000000006, 259.43868907880744, 259.43868907880744, 371.9999999999999, 544.4539334827341, 696.1073774384583]
+		circlesY = [500.0, 664.553628079754, 752.1107847711253, 721.7025033688163, 587.5571566913712, 412.4428433086288, 278.2974966311838, 247.88921522887472, 335.44637192024584]
+
+		ax.scatter(x_eyes, y_eyes, color ='red', s=5)
+		ax.scatter(x_hits, y_hits, color = 'blue', s = 5)
 	   
-	  	ax.scatter(pre_x_eyes[id], pre_y_eyes[id], color = 'green')
+	  	ax.scatter(pre_x_eyes[id], pre_y_eyes[id], color = 'green', s=5)
+
+	  	ax.scatter(circlesX, circlesY, color = 'grey', s=24, alpha=0.2)
 	   
 		plt.xlim(0, 1000)
 		plt.ylim(0,1000)
