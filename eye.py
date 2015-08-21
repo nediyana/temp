@@ -139,6 +139,8 @@ def q(input_filename, distances, items, counter, amplitudes, counterAmps, x_eyes
 def main():
 
     finallist = []
+    all_x_eyes = []
+    all_y_eyes = []
     for filename in os.listdir('fitts_law_final_data/'):
         # print filename
         skip = False
@@ -150,6 +152,7 @@ def main():
         distances = []
         x_post_eyes = []
         y_post_eyes = []
+
         items = {}
         counter = {}
         amplitudes = {}
@@ -166,6 +169,12 @@ def main():
         overall = numpy.asarray(overall)
         overall = [k for k in overall if not (k == -1)]
         finallist = finallist + overall
+
+        # all_x_eyes = all_x_eyes + x_eyes
+        # all_y_eyes = all_y_eyes + y_eyes
+
+        all_x_eyes.append(x_eyes)
+        all_y_eyes.append(y_eyes)
 
 
 
@@ -193,7 +202,7 @@ def main():
        # 	print filename
        #  plt.show()
 
-        print overall
+        # print overall
 
     print "len of overall"
     print len(finallist)
@@ -209,7 +218,7 @@ def main():
     ax.hist(x, numbins, color= 'green', alpha = 0.8)
     plt.show()
 
-    print finallist
+    # print finallist
     for y in finallist:
     	if y < 100:
     		less100.append(y)
@@ -239,6 +248,19 @@ def main():
     print float(float(len(less1000))/float(len(finallist)))
 
 
+
+    print "DOOOOONE"
+
+    print "PRE HIT"
+    print "x eyes"
+    print x_eyes
+    print "y eyes"
+    print y_eyes
+
+    print all_x_eyes
+    print all_y_eyes
+
+    # print all_y_eyes[44]
 '''
         x_eyes = numpy.asarray(x_eyes)
         y_eyes = numpy.asarray(y_eyes)
