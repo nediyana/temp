@@ -21,7 +21,7 @@ import math
 import numpy 
 import matplotlib.pyplot as plt
 
-
+shapes = ["circle", "louisiana", "separated_circle", "michigan", "triangle", "cross", "watermelon", "tetris", "letter_o", "sign"]
 def q(input_filename, distances, items, counter, amplitudes, counterAmps, x_eyes, y_eyes, x_hits, y_hits):
 
 	conditions = {}
@@ -38,6 +38,7 @@ def q(input_filename, distances, items, counter, amplitudes, counterAmps, x_eyes
 	distance = 0
 	distanceFromCenter = 0
 	sequence = [0,5,1,6,2,7,3,8,4,0]
+	checker = 0
 
 	circlesX = [756.0, 696.1073774384583, 544.4539334827342, 372.00000000000006, 259.43868907880744, 259.43868907880744, 371.9999999999999, 544.4539334827341, 696.1073774384583, 756.0]
 	# circlesX = [1006.0, 946.1073774384583, 794.4539334827342, 622.0, 509.43868907880744, 509.43868907880744, 621.9999999999999, 794.4539334827341, 946.1073774384583, 1006.0]
@@ -46,29 +47,33 @@ def q(input_filename, distances, items, counter, amplitudes, counterAmps, x_eyes
 
 	csv_reader = csv.reader(open(input_filename), delimiter = ',')
 
+
 	for row in csv_reader:
 		if row != []:
 			if row[1] == "Condition":
 				shape_id = 0
 				size = row[4]
-				#print size
 				amplitude = row[3]
-				#print amplitude
 				shape = row[2] + "-" + row[3] + "-" + row[4]
-				if (shape not in conditionsHit):
-					conditionsHit[shape] = 0
-				elif shape not in conditionsHit:
-					conditionsHit[shape] = 0
+				if "tetris" in row[2]:
+					checker = checker + 1
+				else: 
+					checker = 0
+
+				# if (shape not in conditionsHit):
+				# 	conditionsHit[shape] = 0
+				# elif shape not in conditionsHit:
+				# 	conditionsHit[shape] = 0
 
 			elif row[1] == "TobiiEyePosition":
-				if "circle" in shape and "separated" not in shape:
+				if "tetris" in shape and "separated" not in shape:
 					x_eye = float(row[2])
 					y_eye = float(row[3])
 
 
 			elif row[1] == "ClickHit":
 				# print shape_id
-				if "circle" in shape and "separated" not in shape:
+				if "tetris" in shape and "separated" not in shape:
 
 					x_hit = float(row[2])
 					y_hit = float(row[3])
@@ -87,12 +92,16 @@ def q(input_filename, distances, items, counter, amplitudes, counterAmps, x_eyes
 						# print circlesX[sequence[shape_id]]
 						#OFFSET with + 1 when this was not the first condition, which means that it starts from the second circle in the sequence, not the first. 
 						#there is not offset if this is the first time the circle starts, so we start with [shape_id] instead of [shape_id+1]
-						distanceFromCenter = math.sqrt(pow((circlesX[sequence[shape_id+1]] - x_hit), 2) + pow((circlesY[sequence[shape_id+1]] - y_hit), 2) )
-						if distanceFromCenter > 24:
-							print input_filename
-							print x_hit, y_hit
-							print circlesX[shape_id], circlesY[shape_id]
-							print distanceFromCenter
+						print checker
+						if checker == 2:
+							distanceFromCenter = math.sqrt(pow((circlesX[sequence[shape_id]] - x_hit), 2) + pow((circlesY[sequence[shape_id]] - y_hit), 2) )
+						else:
+							distanceFromCenter = math.sqrt(pow((circlesX[sequence[shape_id+1]] - x_hit), 2) + pow((circlesY[sequence[shape_id+1]] - y_hit), 2) )
+						# if distanceFromCenter > 12:
+						# print input_filename
+						# print x_hit, y_hit
+						# print circlesX[shape_id], circlesY[shape_id]
+						# print distanceFromCenter
 						
 						shape_id = shape_id + 1
 
@@ -112,8 +121,8 @@ def q(input_filename, distances, items, counter, amplitudes, counterAmps, x_eyes
 						distance = math.sqrt(pow((x_eye - x_hit), 2) + pow((y_eye - y_hit), 2) )
 						distances.append(distance)
 
-						# # print "distance is"
-						# # print distance
+						print "distance is"
+						print distance
 
 						# plt.show()
 
@@ -168,7 +177,11 @@ def main():
 	all_y_eyes = []
 	all_x_hits = []
 	all_y_hits = []
-	for filename in os.listdir('offsetClick/'):
+	# for filename in os.listdir('lookingAtCenter/'):
+	# for filename in os.listdir('random/'):
+	for filename in os.listdir('good/'):
+
+		checker = 0
 		# print filename
 		skip = False
 		overall = []
@@ -191,7 +204,11 @@ def main():
 		less500 = []
 		less1000=[]
 		# print filename
-		q("offsetClick/" + filename, overall, items, counter, amplitudes, counterAmps, x_eyes, y_eyes, x_hits, y_hits)
+		q("good/" + filename, overall, items, counter, amplitudes, counterAmps, x_eyes, y_eyes, x_hits, y_hits)
+
+		# q("random/" + filename, overall, items, counter, amplitudes, counterAmps, x_eyes, y_eyes, x_hits, y_hits)
+
+		# q("lookingAtCenter/" + filename, overall, items, counter, amplitudes, counterAmps, x_eyes, y_eyes, x_hits, y_hits)
 
 		overall = numpy.asarray(overall)
 		overall = [k for k in overall if not (k == -1)]
@@ -215,6 +232,7 @@ def main():
 	   #  print len(x_hits)
 	   #  print "overall"
 	   #  print overall
+
 	   #  print "max overall"
 	   #  print max(overall)
 		
@@ -222,23 +240,18 @@ def main():
 		circlesX = [756.0, 696.1073774384583, 544.4539334827342, 372.00000000000006, 259.43868907880744, 259.43868907880744, 371.9999999999999, 544.4539334827341, 696.1073774384583]
 		circlesY = [500.0, 664.553628079754, 752.1107847711253, 721.7025033688163, 587.5571566913712, 412.4428433086288, 278.2974966311838, 247.88921522887472, 335.44637192024584]
 
-		#centers with cx = cy = 510 = a lot more off..
-		# circlesX = [766.0, 706.1073774384583, 554.4539334827342, 382.00000000000006, 269.43868907880744, 269.43868907880744, 381.9999999999999, 554.4539334827341, 706.1073774384583]
-		# circlesY = [510.0, 674.553628079754, 762.1107847711253, 731.7025033688163, 597.5571566913712, 422.4428433086288, 288.2974966311838, 257.8892152288747, 345.44637192024584]
-		
+	
 		ax.scatter(x_eyes, y_eyes, color ='red', s=25)
 		ax.scatter(x_hits, y_hits, color = 'blue', s=25)
 		#s is the radius i want them to be to the power of two; but i am not sure if 512-24 means that the diameter of those circles was 24 or if it was the radius. for now it is set as the radius, so 24 * 24 = 576
-		ax.scatter(circlesX, circlesY, color = 'grey', s=576, alpha=0.2)
-	   # # # ax.scatter(x_post_eyes, y_post_eyes, color = 'green')
+		ax.scatter(circlesX, circlesY, color = 'grey', s=144, alpha=0.2)
 	   
 		plt.xlim(0,1000)
 		plt.ylim(0,1000)
 	   
-	   # 	print filename
+	   	print filename
 		plt.show()
 
-		# print overall
 
 		all_x_eyes.append(x_eyes)
 		all_y_eyes.append(y_eyes)
@@ -260,7 +273,6 @@ def main():
 	# print max(finallist)
 
 
-	# print overall
 	fig = plt.figure()
 	ax = fig.add_subplot(111)
 	x = finallist
@@ -268,7 +280,6 @@ def main():
 	ax.hist(x, numbins, color= 'green', alpha = 0.8)
 	plt.show()
 
-	# print finallist
 	for y in finallist:
 		if y < 100:
 			less100.append(y)
@@ -283,19 +294,19 @@ def main():
 		elif y < 1000:
 	 		less1000.append(y)
 
-	# print len(less100)
-	# print len(less200)
-	# print len(less300)
-	# print len(less400)
-	# print len(less500)
-	# print len(less1000)
+	print len(less100)
+	print len(less200)
+	print len(less300)
+	print len(less400)
+	print len(less500)
+	print len(less1000)
 
-	# print float(float(len(less100))/float(len(finallist)))
-	# print float(float(len(less200))/float(len(finallist)))
-	# print float(float(len(less300))/float(len(finallist)))
-	# print float(float(len(less400))/float(len(finallist)))
-	# print float(float(len(less500))/float(len(finallist)))
-	# print float(float(len(less1000))/float(len(finallist)))
+	print float(float(len(less100))/float(len(finallist)))
+	print float(float(len(less200))/float(len(finallist)))
+	print float(float(len(less300))/float(len(finallist)))
+	print float(float(len(less400))/float(len(finallist)))
+	print float(float(len(less500))/float(len(finallist)))
+	print float(float(len(less1000))/float(len(finallist)))
 
 
 
@@ -343,4 +354,3 @@ if __name__ == '__main__':
 	main()
 
 
-# 
