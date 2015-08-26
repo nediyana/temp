@@ -55,7 +55,7 @@ def q(input_filename, distances, items, counter, amplitudes, counterAmps, x_eyes
 				size = row[4]
 				amplitude = row[3]
 				shape = row[2] + "-" + row[3] + "-" + row[4]
-				if "tetris" in row[2]:
+				if "letter" in row[2]:
 					checker = checker + 1
 				else: 
 					checker = 0
@@ -66,14 +66,14 @@ def q(input_filename, distances, items, counter, amplitudes, counterAmps, x_eyes
 				# 	conditionsHit[shape] = 0
 
 			elif row[1] == "TobiiEyePosition":
-				if "tetris" in shape and "separated" not in shape:
+				if "letter" in shape and "separated" not in shape:
 					x_eye = float(row[2])
 					y_eye = float(row[3])
 
 
 			elif row[1] == "ClickHit":
 				# print shape_id
-				if "tetris" in shape and "separated" not in shape:
+				if "letter" in shape and "separated" not in shape:
 
 					x_hit = float(row[2])
 					y_hit = float(row[3])
