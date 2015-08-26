@@ -21,7 +21,7 @@ import math
 import numpy 
 import matplotlib.pyplot as plt
 
-def q(input_filename, distances, items, counter, amplitudes, counterAmps, x_eyes, y_eyes, x_hits, y_hits, figure, width, amp):
+def q(input_filename, distances, items, counter, amplitudes, counterAmps, x_eyes, y_eyes, x_hits, y_hits, figure, width, amp, x_offsets, y_offsets):
 
 	conditions = {}
 	conditionsHit = {}
@@ -38,6 +38,7 @@ def q(input_filename, distances, items, counter, amplitudes, counterAmps, x_eyes
 	distanceFromCenter = 0
 	sequence = [0,5,1,6,2,7,3,8,4,0]
 	checker = 0
+
 
 	if amp == "512":
 		circlesX = [756.0, 696.1073774384583, 544.4539334827342, 372.00000000000006, 259.43868907880744, 259.43868907880744, 371.9999999999999, 544.4539334827341, 696.1073774384583]	
@@ -93,7 +94,7 @@ def q(input_filename, distances, items, counter, amplitudes, counterAmps, x_eyes
 
 						x_eyes.append(x_eye)
 						y_eyes.append(y_eye)
-						# print shape_id
+
 						if shape_id > 8:
 							shape_id = 0
 						# print circlesX[sequence[shape_id]]
@@ -127,6 +128,21 @@ def q(input_filename, distances, items, counter, amplitudes, counterAmps, x_eyes
 						# plt.ylim(0,1000)
 						distance = math.sqrt(pow((x_eye - x_hit), 2) + pow((y_eye - y_hit), 2) )
 						distances.append(distance)
+
+
+						## Calculate offset on x and y
+
+						x_offset = x_eye - x_hit
+						y_offset = y_eye - y_hit
+
+
+						## append this to a list of offsets of this shape-width-amp
+						x_offsets.append(x_offset)
+						y_offsets.append(y_offset)
+
+
+						# if distance > 500:
+							# print input_filename
 
 						# print "distance is"
 						# print distance
@@ -184,6 +200,8 @@ def main():
 	all_y_eyes = []
 	all_x_hits = []
 	all_y_hits = []
+
+
 	# for filename in os.listdir('lookingAtCenter/'):
 	# for filename in os.listdir('random/'):
 
@@ -233,71 +251,112 @@ def main():
 					less400 = []
 					less500 = []
 					less1000=[]
-					# print filename
-					q("good/" + filename, overall, items, counter, amplitudes, counterAmps, x_eyes, y_eyes, x_hits, y_hits, figure, width, amp)
+
+
+					x_offsets = []
+					y_offsets = []
+
+					x_eyesNew = []
+					y_eyesNew = []
+
+					q("good/" + filename, overall, items, counter, amplitudes, counterAmps, x_eyes, y_eyes, x_hits, y_hits, figure, width, amp, x_offsets, y_offsets)
 
 					# q("random/" + filename, overall, items, counter, amplitudes, counterAmps, x_eyes, y_eyes, x_hits, y_hits)
 
 					# q("lookingAtCenter/" + filename, overall, items, counter, amplitudes, counterAmps, x_eyes, y_eyes, x_hits, y_hits)
 
+					print x_eyes
+					print y_eyes
+
 					overall = numpy.asarray(overall)
 					overall = [k for k in overall if not (k == -1)]
-					finallist = finallist + overall
 
-					# temp = temp + overall
+					if x_eyes == [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]:
+						print "NOPE"
+					else:
+						print "YEP"
+						finallist = finallist + overall
 
-					# all_x_eyes = all_x_eyes + x_eyes
-					# all_y_eyes = all_y_eyes + y_eyes
-
-					# all_x_eyes.append(x_eyes)
-					# all_y_eyes.append(y_eyes)
+						# # calculate the average offset for this shape-width-amp between eye and hit
+						averageXoffset = numpy.mean(x_offsets)
+						averageYoffset = numpy.mean(y_offsets)
 
 
 
-					##Plot gaze data in red, and actual click hits in blue
-					# ## from http://forums.udacity.com/questions/10012308/how-to-draw-two-graphs-in-one-scatterplot
+						##Plot gaze data in red, and actual click hits in blue
+						# ## from http://forums.udacity.com/questions/10012308/how-to-draw-two-graphs-in-one-scatterplot
+						
+
+						## go throught the list of eye coordinates and adjust according to the calculated average offset
+						for dotx in x_eyes:
+							dotx = dotx - averageXoffset
+							x_eyesNew.append(dotx)
+
+						for doty in y_eyes:
+							doty = doty - averageYoffset
+							y_eyesNew.append(doty)
+					   
+
+						if amp == "512":
+							circlesX = [756.0, 696.1073774384583, 544.4539334827342, 372.00000000000006, 259.43868907880744, 259.43868907880744, 371.9999999999999, 544.4539334827341, 696.1073774384583]
+							circlesY = [500.0, 664.553628079754, 752.1107847711253, 721.7025033688163, 587.5571566913712, 412.4428433086288, 278.2974966311838, 247.88921522887472, 335.44637192024584]
+						elif amp == "384":
+							circlesX = [692.0, 647.0805330788438, 533.3404501120507, 404.00000000000006, 319.5790168091056, 319.5790168091056, 403.9999999999999, 533.3404501120506, 647.0805330788437, 692.0]
+							circlesY = [500.0, 623.4152210598155, 689.0830885783439, 666.2768775266122, 565.6678675185284, 434.3321324814716, 333.72312247338783, 310.91691142165604, 376.5847789401844, 499.99999999999994]
+						
+						elif amp == "256":
+							circlesX = [628.0, 598.0536887192292, 522.226966741367, 436.0, 379.7193445394037, 379.7193445394037, 435.99999999999994, 522.226966741367, 598.0536887192292, 628.0]
+							circlesY = [500.0, 582.2768140398771, 626.0553923855626, 610.8512516844082, 543.7785783456857, 456.22142165431444, 389.1487483155919, 373.94460761443736, 417.7231859601229, 499.99999999999994]
+						
+						print filename
 					
-					# fig = plt.figure()
-					# ax = fig.add_subplot(111)
-				   
 
-					if amp == "512":
-						circlesX = [756.0, 696.1073774384583, 544.4539334827342, 372.00000000000006, 259.43868907880744, 259.43868907880744, 371.9999999999999, 544.4539334827341, 696.1073774384583]
-						circlesY = [500.0, 664.553628079754, 752.1107847711253, 721.7025033688163, 587.5571566913712, 412.4428433086288, 278.2974966311838, 247.88921522887472, 335.44637192024584]
-					elif amp == "384":
-						circlesX = [692.0, 647.0805330788438, 533.3404501120507, 404.00000000000006, 319.5790168091056, 319.5790168091056, 403.9999999999999, 533.3404501120506, 647.0805330788437, 692.0]
-						circlesY = [500.0, 623.4152210598155, 689.0830885783439, 666.2768775266122, 565.6678675185284, 434.3321324814716, 333.72312247338783, 310.91691142165604, 376.5847789401844, 499.99999999999994]
-					
-					elif amp == "256":
-						circlesX = [628.0, 598.0536887192292, 522.226966741367, 436.0, 379.7193445394037, 379.7193445394037, 435.99999999999994, 522.226966741367, 598.0536887192292, 628.0]
-						circlesY = [500.0, 582.2768140398771, 626.0553923855626, 610.8512516844082, 543.7785783456857, 456.22142165431444, 389.1487483155919, 373.94460761443736, 417.7231859601229, 499.99999999999994]
-					
-				
-					# ax.scatter(x_eyes, y_eyes, color ='red', s=25)
-					# ax.scatter(x_hits, y_hits, color = 'blue', s=25)
-					#s is the radius i want them to be to the power of two; but i am not sure if 512-24 means that the diameter of those circles was 24 or if it was the radius. for now it is set as the radius, so 24 * 24 = 576
-					# ax.scatter(circlesX, circlesY, color = 'grey', s=pow((int(width))/2,2), alpha=0.2)
-				   
-					# plt.xlim(0,1000)
-					# plt.ylim(0,1000)
-				   
-				   	# print filename
-					# plt.show()
+						#### Plot original gaze, hit, and shape
+						# fig = plt.figure()
+						# ax = fig.add_subplot(111)
 
 
-					all_x_eyes.append(x_eyes)
-					all_y_eyes.append(y_eyes)
-					all_x_hits.append(x_hits)
-					all_y_hits.append(y_hits)
+						# ax.scatter(x_eyes, y_eyes, color ='red', s=25)
+						# ax.scatter(x_hits, y_hits, color = 'blue', s=25)
+						# #s is the radius i want them to be to the power of two; but i am not sure if 512-24 means that the diameter of those circles was 24 or if it was the radius. for now it is set as the radius, so 24 * 24 = 576
+						# ax.scatter(circlesX, circlesY, color = 'grey', s=pow((int(width))/2,2), alpha=0.2)
+					   
+						# plt.xlim(0,1000)
+						# plt.ylim(0,1000)
+					   
+					 #   	# print filename
+						# plt.show()
 
-					# print "x hits"
-					# print all_x_hits
-					# print "y hits"
-					# print all_y_hits
-					# print "x eyes"
-					# print all_x_eyes
-					# print "y eyes"
-					# print all_y_eyes
+
+						### Plot fixing the offset of the gaze data, with hit and shape
+						# fig = plt.figure()
+						# ax = fig.add_subplot(111)
+
+						# ax.scatter(x_eyesNew, y_eyesNew, color ='red', s=25)
+						# ax.scatter(x_hits, y_hits, color = 'blue', s=25)
+						# #s is the radius i want them to be to the power of two; but i am not sure if 512-24 means that the diameter of those circles was 24 or if it was the radius. for now it is set as the radius, so 24 * 24 = 576
+						# ax.scatter(circlesX, circlesY, color = 'grey', s=pow((int(width))/2,2), alpha=0.2)
+					   
+						# plt.xlim(0,1000)
+						# plt.ylim(0,1000)
+					   
+					 #   	# print filename
+						# plt.show()
+
+
+						all_x_eyes.append(x_eyes)
+						all_y_eyes.append(y_eyes)
+						all_x_hits.append(x_hits)
+						all_y_hits.append(y_hits)
+
+						# print "x hits"
+						# print all_x_hits
+						# print "y hits"
+						# print all_y_hits
+						# print "x eyes"
+						# print all_x_eyes
+						# print "y eyes"
+						# print all_y_eyes
 
 				# print "len of overall"
 				# print len(finallist)
@@ -305,47 +364,49 @@ def main():
 				# print max(finallist)
 
 
-				# fig = plt.figure()
-				# ax = fig.add_subplot(111)
-				# x = finallist
-				# numbins =  [0, 50, 100, 200, 300, 400, 500, 600, 800, 1000]
-				# ax.hist(x, numbins, color= 'green', alpha = 0.8)
-				# plt.show()
+				fig = plt.figure()
+				ax = fig.add_subplot(111)
+				x = finallist
+				numbins =  [0, 50, 100, 200, 300, 400, 500, 600, 800, 1000]
+				ax.hist(x, numbins, color= 'green', alpha = 0.8)
+				plt.show()
 
-				for y in finallist:
-					if y < 100:
-						less100.append(y)
-					elif y < 200:
-						less200.append(y)
-					elif y < 300:
-						less300.append(y)
-					elif y < 400:
-						less400.append(y)
-					elif y < 500:
-						less500.append(y)
-					elif y < 1000:
-				 		less1000.append(y)
+				if x_eyes != [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]:
+					print "NOPE"
+					for y in finallist:
+						if y < 100:
+							less100.append(y)
+						elif y < 200:
+							less200.append(y)
+						elif y < 300:
+							less300.append(y)
+						elif y < 400:
+							less400.append(y)
+						elif y < 500:
+							less500.append(y)
+						elif y < 1000:
+					 		less1000.append(y)
 
-				# print len(less100)
-				# print len(less200)
-				# print len(less300)
-				# print len(less400)
-				# print len(less500)
-				# print len(less1000)
+					# print len(less100)
+					# print len(less200)
+					# print len(less300)
+					# print len(less400)
+					# print len(less500)
+					# print len(less1000)
 
-				print float(float(len(less100))/float(len(finallist)))
-				if float(float(len(less100))/float(len(finallist))) > minPercentage:
-					minPercentage = float(float(len(less100))/float(len(finallist)))
-					minFilename = filename
-					minAmp = amp
-					minWidth = width
-					minShape = figure
-					# print filename
-				# print float(float(len(less200))/float(len(finallist)))
-				# print float(float(len(less300))/float(len(finallist)))
-				# print float(float(len(less400))/float(len(finallist)))
-				# print float(float(len(less500))/float(len(finallist)))
-				# print float(float(len(less1000))/float(len(finallist)))
+					print float(float(len(less100))/float(len(finallist)))
+					if float(float(len(less100))/float(len(finallist))) > minPercentage:
+						minPercentage = float(float(len(less100))/float(len(finallist)))
+						minFilename = filename
+						minAmp = amp
+						minWidth = width
+						minShape = figure
+						# print filename
+					# print float(float(len(less200))/float(len(finallist)))
+					# print float(float(len(less300))/float(len(finallist)))
+					# print float(float(len(less400))/float(len(finallist)))
+					# print float(float(len(less500))/float(len(finallist)))
+					# print float(float(len(less1000))/float(len(finallist)))
 
 
 
@@ -405,3 +466,4 @@ if __name__ == '__main__':
 	main()
 
 
+# 
